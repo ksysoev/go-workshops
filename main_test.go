@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"testing"
 )
 
 // Go standard library provides 2 ways to create errors:
@@ -69,4 +71,29 @@ func ExampleReturningValueAndError() {
 	// Output:
 	// Result1: 5
 	// Error2: division by zero
+}
+
+// Expected flow errors are errors that are expected to happen in the normal flow of the program.
+// For example:
+// - SQL query returns record not found
+// - while reading a file you reach the end of the file
+// - user enters an invalid password
+// - etc.
+
+// To simplify the error handling of expected flow errors, we can define public variables for them.
+
+// ErrUserNotFound is an error returned when a user is not found.
+var ErrUserNotFound = errors.New("user not found")
+
+// GetUser function returns a user by ID.
+// It returns an error if the user is not found.
+func GetUser(id int) (string, error) {
+	return "", ErrUserNotFound
+}
+
+func TestExpectedFlowErrors(t *testing.T) {
+	_, err := GetUser(1)
+	if err != errors.New("record not found") {
+		t.Errorf("expected ErrRecordNotFound, got %v", err)
+	}
 }
