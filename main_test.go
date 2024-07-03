@@ -46,3 +46,31 @@ func ExampleReturningError() {
 	// Output:
 	// Error2: password is too short: short
 }
+
+// What if we need to return a value along or an error from the function?
+// by convention, first we return success values and last we return error.
+// Let's try to fix the code below by returning a value along with an error from the function.
+
+// Divide function divides two numbers.
+// It returns the result of the division and an error if the denominator is zero.
+func Divide(a, b int) (int, error) {
+	return a / b, nil
+}
+
+func ExampleReturningValueAndError() {
+	if result, err := Divide(10, 2); err != nil {
+		fmt.Println("Error1:", err)
+	} else {
+		fmt.Println("Result1:", result)
+	}
+
+	if result, err := Divide(10, 0); err != nil {
+		fmt.Println("Error2:", err)
+	} else {
+		fmt.Println("Result2:", result)
+	}
+
+	// Output:
+	// Result: 5
+	// Error2: division by zero
+}
