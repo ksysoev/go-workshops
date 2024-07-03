@@ -1,9 +1,7 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"testing"
 )
 
 // Go standard library provides 2 ways to create errors:
@@ -28,23 +26,23 @@ func ExampleCreatingErrors() {
 	// Error2: an error with value 42
 }
 
-func getError() error {
-	return errors.New("an error")
+// Now, let's try to return an error from a function.
+
+// ValidatePasswordLen function validates the length of the password.
+// It returns an error if the password is shorter than 8 characters.
+func ValidatePasswordLen(password string) error {
+	return nil
 }
 
 func ExampleReturningError() {
-	err := getError()
-	if err != nil {
+	if err := ValidatePasswordLen("longpassword"); err != nil {
 		fmt.Println("Error:", err)
 	}
-	// Output: Error: an error
-}
 
-func TestReturningError(t *testing.T) {
-	expectedError := errors.New("an error")
-
-	err := getError()
-	if err != expectedError {
-		t.Errorf("Expected error to be '%v', but got '%v'", expectedError, err)
+	if err := ValidatePasswordLen("short"); err != nil {
+		fmt.Println("Error2:", err)
 	}
+
+	// Output:
+	// Error2: password is too short: short
 }
