@@ -58,19 +58,15 @@ func Divide(a, b int) (int, error) {
 }
 
 func ExampleReturningValueAndError() {
-	if result, err := Divide(10, 2); err != nil {
-		fmt.Println("Error1:", err)
-	} else {
+	if result, err := Divide(10, 2); err == nil {
 		fmt.Println("Result1:", result)
 	}
 
-	if result, err := Divide(10, 0); err != nil {
+	if _, err := Divide(10, 0); err != nil {
 		fmt.Println("Error2:", err)
-	} else {
-		fmt.Println("Result2:", result)
 	}
 
 	// Output:
-	// Result: 5
+	// Result1: 5
 	// Error2: division by zero
 }
