@@ -147,6 +147,9 @@ func ExampleCustomErrors() {
 // Error wrapping is a technique to add more context to an error
 // by wrapping the original error with a new error.
 // To wrap an error, we can use fmt.Errorf() function with %w verb.
+// when to wrap an error:
+// - when we need to add more context to the error
+// - when we get an error from a third-party library it's a good practice to wrap it with a more descriptive error
 
 func ExampleErrorWrapping() {
 	userID := 10
@@ -165,18 +168,19 @@ func ExampleErrorWrapping() {
 func ExampleErrorUnwrapping() {
 	userID := 10
 	_, err := GetUser(userID)
-	fmt.Errorf("Fail to fetch user %d for update: %w", userID, err)
+	err = fmt.Errorf("Fail to fetch user %d for update: %w", userID, err)
 
 	if err == ErrUserNotFound {
 		fmt.Println("Error:", err)
 	}
 
 	err = ValidateField("username", "verylongvalue")
-	fmt.Errorf("Fail to validate signup form: %w", err)
-	// if fieldErr, ok := err.(*FieldValidationError); ok {
-	// 	fmt.Println("Field:", fieldErr.Field)
-	// 	fmt.Println("Message:", fieldErr.Msg)
-	// }
+	err = fmt.Errorf("Fail to validate signup form: %w", err)
+	if err != nil {
+		fmt.Println("Error:", err)
+		// 	fmt.Println("Field:", fieldErr.Field)
+		// 	fmt.Println("Message:", fieldErr.Msg)
+	}
 
 	// Output:
 	// Error: user not found
