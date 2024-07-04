@@ -103,11 +103,13 @@ func TestExpectedFlowErrors(t *testing.T) {
 // Custom errors are useful when we need to add more context to the error.
 // for example, we can add an error code, error message, etc.
 
+// FieldValidationError is  field validation error.
 type FieldValidationError struct {
 	Field string
 	Msg   string
 }
 
+// NewFieldValidationError creates a new field validation error.
 func NewFieldValidationError(field, msg string) *FieldValidationError {
 	return &FieldValidationError{
 		Field: field,
@@ -115,6 +117,7 @@ func NewFieldValidationError(field, msg string) *FieldValidationError {
 	}
 }
 
+// ValidateField function validates a field value.
 func ValidateField(field, value string) error {
 	if len(value) > 10 {
 		return fmt.Errorf("value is too long")
@@ -139,4 +142,19 @@ func ExampleCustomErrors() {
 	// Error: too long
 	// Field: username
 	// Message: value is too long
+}
+
+// Error wrapping is a technique to add more context to an error
+// by wrapping the original error with a new error.
+// To wrap an error, we can use fmt.Errorf() function with %w verb.
+
+func ExampleErrorWrapping() {
+	userID := 10
+	_, err := GetUser(userID)
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+
+	// Output:
+	// Error: Fail to fetch user 10 for update: user not found
 }
