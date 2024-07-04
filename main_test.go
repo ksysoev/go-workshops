@@ -97,3 +97,46 @@ func TestExpectedFlowErrors(t *testing.T) {
 		t.Errorf("expected ErrRecordNotFound, got %v", err)
 	}
 }
+
+// To implement custom errors, we can create a new type that implements the error interface.
+// error interface has only one method: Error() string
+// Custom errors are useful when we need to add more context to the error.
+// for example, we can add an error code, error message, etc.
+
+type FieldValidationError struct {
+	Field string
+	Msg   string
+}
+
+func NewFieldValidationError(field, msg string) *FieldValidationError {
+	return &FieldValidationError{
+		Field: field,
+		Msg:   msg,
+	}
+}
+
+func ValidateField(field, value string) error {
+	if len(value) > 10 {
+		return fmt.Errorf("value is too long")
+	}
+
+	return nil
+}
+
+func ExampleCustomErrors() {
+	err := ValidateField("username", "verylongvalue")
+
+	if err != nil {
+		fmt.Println("Error:", err)
+
+		var field, msg string
+
+		fmt.Println("Field:", field)
+		fmt.Println("Message:", msg)
+	}
+
+	// Output:
+	// Error: too long
+	// Field: username
+	// Message: value is too long
+}
