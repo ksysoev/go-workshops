@@ -158,3 +158,26 @@ func ExampleErrorWrapping() {
 	// Output:
 	// Error: Fail to fetch user 10 for update: user not found
 }
+
+// With error wrapping, we can create a chain of errors.
+// To unwrap an error, we can use errors.Is() and errors.As() functions.
+
+func ExampleErrorUnwrapping() {
+	userID := 10
+	_, err := GetUser(userID)
+	if errors.Is(err, ErrUserNotFound) {
+		fmt.Println("Error:", err)
+	}
+
+	err = ValidateField("username", "verylongvalue")
+	var fieldErr *FieldValidationError
+	if errors.As(err, &fieldErr) {
+		fmt.Println("Field:", fieldErr.Field)
+		fmt.Println("Message:", fieldErr.Msg)
+	}
+
+	// Output:
+	// Error: user not found
+	// Field: username
+	// Message: value is too long
+}
