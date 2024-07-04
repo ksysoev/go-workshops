@@ -165,16 +165,18 @@ func ExampleErrorWrapping() {
 func ExampleErrorUnwrapping() {
 	userID := 10
 	_, err := GetUser(userID)
-	if errors.Is(err, ErrUserNotFound) {
+	fmt.Errorf("Fail to fetch user %d for update: %w", userID, err)
+
+	if err == ErrUserNotFound {
 		fmt.Println("Error:", err)
 	}
 
 	err = ValidateField("username", "verylongvalue")
-	var fieldErr *FieldValidationError
-	if errors.As(err, &fieldErr) {
-		fmt.Println("Field:", fieldErr.Field)
-		fmt.Println("Message:", fieldErr.Msg)
-	}
+	fmt.Errorf("Fail to validate signup form: %w", err)
+	// if fieldErr, ok := err.(*FieldValidationError); ok {
+	// 	fmt.Println("Field:", fieldErr.Field)
+	// 	fmt.Println("Message:", fieldErr.Msg)
+	// }
 
 	// Output:
 	// Error: user not found
