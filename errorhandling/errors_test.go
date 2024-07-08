@@ -1,12 +1,23 @@
 package errorhandling
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"log/slog"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/jackc/pgconn"
 )
+
+var logBuffer = &bytes.Buffer{}
+
+func init() {
+	var handler = slog.NewTextHandler(logBuffer, &slog.HandlerOptions{})
+	slog.SetDefault(slog.New(handler))
+}
 
 // Go standard library provides 2 ways to create errors:
 // 1. errors.New() function
@@ -217,6 +228,35 @@ func ExampleJoiningErrors2() {
 	// Output:
 	// Errors: error1
 	// error2
+}
+
+// Let's discuss logging in context of error handling.
+// When should we log an error? When should we return an error?
+
+// 1. You should ether log an error or return an error, but not both.
+
+// 2. If error is not expected to happen in the normal flow of the program, but it's not breaking execution flow, you should log it and continue the execution.
+
+// 3. If error is breaking execution flow, add more context with wrapping and return it to the caller.
+
+// Let's try to fix the code below by adding logging and returning an error.
+
+func getServiceAddress() string {
+	addr, ok := os.LookupEnv("SERVICE_ADDRESS")
+	if ok {
+		return addr
+	}
+
+	return ":8080"
+}
+
+func TestLogging(t *testing.T) {
+	logBuffer.Reset()
+	_ = getServiceAddress()
+
+	if !strings.Contains(logBuffer.String(), "failed to get service address, using default address") {
+		t.Errorf("expected to log error, got '%s'", logBuffer.String())
+	}
 }
 
 // In addition to standard errors, Go provides a way to throw exceptions like errors using panic() function.
