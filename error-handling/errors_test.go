@@ -248,3 +248,46 @@ func ExamplePanicAndRecover() {
 	// Output:
 	// Panic: something went wrong
 }
+
+// I think we mostly covered the error handling in Go.
+// Let's try to consider some pitfalls that could be related to error handling.
+
+// let't  try to analyse the code below and find what's wrong with it.
+
+// Pitfall 1:
+
+type Client struct {
+	Name string
+	Age  uint16
+}
+
+type InvalidClientError struct {
+	Msg string
+}
+
+func (e *InvalidClientError) Error() string {
+	return e.Msg
+}
+
+func ValidateClient(client Client) error {
+	var err *InvalidClientError
+
+	if client.Name == "" {
+		err = &InvalidClientError{Msg: "name is required"}
+	} else if client.Age < 18 {
+		err = &InvalidClientError{Msg: "age should be greater than 18"}
+	}
+
+	return err
+}
+
+func ExampleReturningNilInterface() {
+	client := Client{Name: "Vasia Pupkin", Age: 42}
+	err := ValidateClient(client)
+
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+
+	// Output:
+}
