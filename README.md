@@ -4,7 +4,7 @@ This repository contains materials for workshops about Go (Golang) programming l
 
 ## Content
 
-- Error Handling
+- [Error Handling](./errorhandling/README.md)
 
 
 # How to use 
