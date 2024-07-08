@@ -187,3 +187,31 @@ func ExampleErrorUnwrapping() {
 	// Field: username
 	// Message: value is too long
 }
+
+// Let's imaging we have multiple errors and we want to return them all.
+// If we know exactly how many errors we have, we can use fmt.Errorf() function with %w verb.
+
+func ExampleJoiningErrors1() {
+	_ = errors.New("error1")
+	_ = errors.New("error2")
+	err := fmt.Errorf("multiple errors")
+
+	fmt.Println("Error:", err)
+
+	// Output:
+	// Error: multiple errors: error1, error2
+}
+
+// If we don't know how many errors we have, we can use errors.Join() function to achieve the simular result.
+func ExampleJoiningErrors2() {
+	_ = errors.New("error1")
+	_ = errors.New("error2")
+
+	var errs error
+
+	fmt.Println("Error:", errs)
+
+	// Output:
+	// Errors: error1
+	// error2
+}
