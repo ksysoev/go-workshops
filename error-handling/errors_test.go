@@ -203,6 +203,7 @@ func ExampleJoiningErrors1() {
 }
 
 // If we don't know how many errors we have, we can use errors.Join() function to achieve the simular result.
+
 func ExampleJoiningErrors2() {
 	_ = errors.New("error1")
 	_ = errors.New("error2")
@@ -214,4 +215,36 @@ func ExampleJoiningErrors2() {
 	// Output:
 	// Errors: error1
 	// error2
+}
+
+// In addition to standard errors, Go provides a way to throw exceptions like errors using panic() function.
+// to catch exceptions we can use recover() function.
+// But Rule of thumb: DON'T PANIC and always carry a towel. :)
+// But if we have panic and recover as part of the language, probably there are some valid use cases.
+// Let's try to think what are they:
+// 1. panic when it's clearly a developer mistake and it could put the application in incorect state.
+
+// here is an example from standard library:
+// - Creating ticker with duration that doesn't make any sense https://cs.opensource.google/go/go/+/refs/tags/go1.22.5:src/time/tick.go;l=20-23
+// - Creating context from parent context, but got nil instead https://cs.opensource.google/go/go/+/master:src/context/context.go;l=269-271
+// - Creating a new channel with a negative buffer size https://cs.opensource.google/go/go/+/refs/tags/go1.22.5:src/runtime/chan.go;l=33-35
+
+// But if your function already returns an error, it's better to return an error instead of panicking even if it's a developer mistake.
+
+// 2. When you have a function with deep call stack and you want to stop the execution and return an error to the top level function.
+//    for this case it's crucial to recover the panic and return an error at top level of your function.
+//    The rule of thumb here, internal panic should never cross boundaries of your package.
+
+// 3. When we fail to initialize dependncies that are crucial for the application logic.
+//    For example:
+//    - Regular expression pattern is invalid https://cs.opensource.google/go/go/+/master:src/net/http/cgi/host.go;l=36?q=MustCompile&ss=go%2Fgo:src%2Fnet%2F&start=1
+//    - Some template is crucial for the application to work is missing or invalid
+
+// Let's try to fix the code below by using panic() and recover() functions to pass the test.
+
+func ExamplePanicAndRecover() {
+	panic("something went wrong")
+
+	// Output:
+	// Panic: something went wrong
 }
