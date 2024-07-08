@@ -1,9 +1,11 @@
-package main
+package errorhandling
 
 import (
 	"errors"
 	"fmt"
 	"testing"
+
+	"github.com/jackc/pgconn"
 )
 
 // Go standard library provides 2 ways to create errors:
@@ -307,4 +309,22 @@ func ExampleLoggingErrors() {
 
 	// Output:
 	// Error: something went wrong
+}
+
+// Pitfall 3:
+func ExampleHandllingDbError() {
+	err := GetUsers()
+
+	if err != nil {
+		var pgErr *pgconn.PgError
+
+		if errors.As(err, &pgErr) {
+			fmt.Println(pgErr.Message)
+			fmt.Println(pgErr.Code)
+		}
+	}
+
+	// Output:
+	// relation "users" does not exist
+	// 42P01
 }
