@@ -291,3 +291,20 @@ func ExampleReturningNilInterface() {
 
 	// Output:
 }
+
+// Pitfall 2:
+func logError(err error) {
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+}
+
+func ExampleLoggingErrors() {
+	var err error
+	defer logError(err)
+
+	err = errors.New("something went wrong")
+
+	// Output:
+	// Error: something went wrong
+}
