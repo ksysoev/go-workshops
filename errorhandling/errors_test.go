@@ -316,7 +316,7 @@ func ExampleHandllingDbError() {
 	err := GetUsers()
 
 	if err != nil {
-		var pgErr *pgconn.PgError
+		var pgErr pgconn.PgError
 
 		if errors.As(err, &pgErr) {
 			fmt.Println(pgErr.Message)
