@@ -1,3 +1,3 @@
-module github.com/ksysoev/error-handling
+module github.com/ksysoev/go-workshops
 
 go 1.22.1
