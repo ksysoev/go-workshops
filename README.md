@@ -9,19 +9,21 @@ This repository contains materials for workshops about Go (Golang) programming l
 
 # How to use 
 
-1. clone the repository:
+1. Fork the repository on Github.
+
+2. Clone repository to your machine:
 
 ```sh
 git clone https://github.com/yourusername/go-workshops.git
 ```
 
-2. Navigate to the cloned directory:
+3. Navigate to the cloned directory:
 
 ```sh
 cd go-workshops
 ```
 
-3. Follow the instructions in each workshop folder to get started.
+4. Follow the instructions in each workshop folder to get started.
    
 
 ## Prerequisites
