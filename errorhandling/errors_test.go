@@ -277,14 +277,14 @@ func TestLogging(t *testing.T) {
 
 // But if your function already returns an error, it's better to return an error instead of panicking even if it's a developer mistake.
 
-// 2. When you have a function with deep call stack and you want to stop the execution and return an error to the top level function.
-//    for this case it's crucial to recover the panic and return an error at top level of your function.
-//    The rule of thumb here, internal panic should never cross boundaries of your package.
-
-// 3. When we fail to initialize dependncies that are crucial for the application logic.
+// 2. When we fail to initialize dependncies that are crucial for the application logic.
 //    For example:
 //    - Regular expression pattern is invalid https://cs.opensource.google/go/go/+/master:src/net/http/cgi/host.go;l=36?q=MustCompile&ss=go%2Fgo:src%2Fnet%2F&start=1
 //    - Some template is crucial for the application to work is missing or invalid
+
+// 3. When you have a recursion function with deep call stack and you want to stop the execution and return an error to the top level function.
+//    for this case it's crucial to recover the panic and return an error at top level of your function.
+//    The rule of thumb here, internal panic should never cross boundaries of your package.
 
 // Let's try to fix the code below by using panic() and recover() functions to pass the test.
 
