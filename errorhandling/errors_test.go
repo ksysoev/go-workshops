@@ -89,9 +89,9 @@ func ExampleReturningValueAndError() {
 // Expected flow errors are errors that are expected to happen in the normal flow of the program.
 // For example:
 // - SQL query returns record not found
-// - while reading a file you reach the end of the file
+// - while reading a file you reach the end of the file https://cs.opensource.google/go/go/+/master:src/io/io.go;l=44
 // - user enters an invalid password
-// - etc.
+// - try to strart a server that is already closed https://cs.opensource.google/go/go/+/master:src/net/http/server.go;l=3288?q=%22var%20Err%22&ss=go%2Fgo:src%2Fnet%2Fhttp%2F
 
 // To simplify the error handling of expected flow errors, we can define public variables for them.
 
@@ -115,6 +115,10 @@ func TestExpectedFlowErrors(t *testing.T) {
 // error interface has only one method: Error() string
 // Custom errors are useful when we need to add more context to the error.
 // for example, we can add an error code, error message, etc.
+
+// here some examples of custom errors from standard library:
+// - JSON errors https://cs.opensource.google/go/go/+/master:src/encoding/json/encode.go;l=197-210?q=type%20Error&ss=go%2Fgo&start=61
+// - Net errors https://cs.opensource.google/go/go/+/master:src/encoding/json/encode.go;l=197-210?q=type%20Error&ss=go%2Fgo&start=61
 
 // FieldValidationError is  field validation error.
 type FieldValidationError struct {
