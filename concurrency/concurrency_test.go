@@ -1,6 +1,7 @@
 package concurrency
 
 import (
+	"context"
 	"testing"
 	"time"
 )
@@ -33,6 +34,30 @@ func TestForkJoin(t *testing.T) {
 	select {
 	case <-done:
 	case <-time.After(time.Second):
-		t.Errorf("Expected call to return")
+		t.Errorf("Expected to done channel to be closed")
+	}
+}
+
+// The main should be able to control the child goroutine execution.
+// For example if the main goroutine will be requested to stop, it should be able to cancel the child goroutine execution.
+// This can be done by using context package.
+func TestParrentControl(t *testing.T) {
+	_, cancel := context.WithCancel(context.Background())
+	done := make(chan struct{})
+
+	go func() {
+		t.Log("Child goroutine")
+		<-time.After(10 * time.Second)
+
+		close(done)
+	}()
+
+	t.Log("Parent cancel child goroutine execution")
+	cancel()
+
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		t.Errorf("Expected to done channel to be closed")
 	}
 }
