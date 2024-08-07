@@ -82,6 +82,28 @@ func TestRaceCondition(t *testing.T) {
 	}
 }
 
+// When something is considered atomic, or to have the property of atomicity,
+// this means that within the context that it is operating, it is indivisible, or uninterruptible.
+// Most statements in Go are not atomic
+func TestAtomacity(t *testing.T) {
+	counter := 0
+	wg := sync.WaitGroup{}
+
+	for i := 0; i < 1000; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			counter++
+		}()
+	}
+
+	wg.Wait()
+
+	if counter != 1000 {
+		t.Errorf("Expected counter to be 1000, got %d", counter)
+	}
+}
+
 // Unbounded concurrency can lead to resource exhaustion and poor performance due to contention.
 // To limit the number of goroutines that can run concurrently, we can use a semaphore.
 // A semaphore is a synchronization primitive that limits the number of concurrent operations.
