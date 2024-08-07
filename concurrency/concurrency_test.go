@@ -84,7 +84,7 @@ func TestRaceCondition(t *testing.T) {
 
 // When something is considered atomic, or to have the property of atomicity,
 // this means that within the context that it is operating, it is indivisible, or uninterruptible.
-// Most statements in Go are not atomic
+// Most statements in Go are not atomic. For example, incrementing a variable is not atomic.
 func TestAtomacity(t *testing.T) {
 	counter := 0
 	wg := sync.WaitGroup{}
@@ -101,6 +101,40 @@ func TestAtomacity(t *testing.T) {
 
 	if counter != 1000 {
 		t.Errorf("Expected counter to be 1000, got %d", counter)
+	}
+}
+
+// Deadlocks and Livelocks
+// Deadlock is a situation where two or more goroutines are waiting for each other to release resources, causing them to be blocked indefinitely.
+// Livelock is a situation where two or more goroutines are actively trying to resolve a deadlock, but none of them can make progress.
+
+func EatPasta(t *testing.T, name string, result chan<- string, cutlery ...*sync.Mutex) {
+	for i, c := range cutlery {
+		c.Lock()
+		t.Logf("%s got %d item\n", name, i+1)
+		time.Sleep(time.Microsecond)
+		defer c.Unlock()
+	}
+
+	result <- name + " is done eating pasta"
+}
+
+func TestDeadlock(t *testing.T) {
+	results := make(chan string)
+
+	fork := &sync.Mutex{}
+	spoon := &sync.Mutex{}
+
+	go EatPasta(t, "Plato", results, fork, spoon)
+	go EatPasta(t, "Socrates", results, spoon, fork)
+
+	for i := 0; i < 2; i++ {
+		select {
+		case res := <-results:
+			t.Log(res)
+		case <-time.After(1 * time.Second):
+			t.Fatal("Expected to receive result")
+		}
 	}
 }
 
