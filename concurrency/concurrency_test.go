@@ -66,6 +66,22 @@ func TestParrentControl(t *testing.T) {
 	}
 }
 
+// Data races and Race conditions, what is the difference?
+// Data race is a condition in which two goroutines access the same variable concurrently and at least one of the accesses is a write.
+// On the other hand Race condition is a condition in which the program’s output is dependent on the sequence or timing of uncontrollable events,
+// which can lead to non-deterministic behavior.
+func TestRaceCondition(t *testing.T) {
+	data := 0
+
+	go func() {
+		data++
+	}()
+
+	if data != 1 {
+		t.Error("Expected data to incremented by 1")
+	}
+}
+
 // Unbounded concurrency can lead to resource exhaustion and poor performance due to contention.
 // To limit the number of goroutines that can run concurrently, we can use a semaphore.
 // A semaphore is a synchronization primitive that limits the number of concurrent operations.
