@@ -138,6 +138,25 @@ func TestDeadlock(t *testing.T) {
 	}
 }
 
+// nil channels are never selected.
+// The select statement blocks until at least one of the send or receive operations can proceed.
+
+func Mirror(t *testing.T, in <-chan string, out1 chan<- string, out2 chan<- string) {
+	for msg := range in {
+		var out1, out2 = out1, out2
+		select {
+		case out1 <- msg:
+			out1 = nil
+		case out2 <- msg:
+			out2 = nil
+		}
+	}
+}
+
+func TestNilChannel(t *testing.T) {
+
+}
+
 // Unbounded concurrency can lead to resource exhaustion and poor performance due to contention.
 // To limit the number of goroutines that can run concurrently, we can use a semaphore.
 // A semaphore is a synchronization primitive that limits the number of concurrent operations.
