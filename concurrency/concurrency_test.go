@@ -150,6 +150,71 @@ func TestDeadlock(t *testing.T) {
 
 // TODO: Would be nice to have a test for each of the synchronization primitives
 
+// Sync.Once is a synchronization primitive that guarantees that a function is executed only once.
+// It is useful for initializing resources that are expensive to create or need to be shared across multiple goroutines.
+// The Do method takes a function as an argument and ensures that the function is executed only once.
+
+type RateLimiter struct {
+	capacity int32
+	counter  *atomic.Int32
+	ctx      context.Context
+	cancel   context.CancelFunc
+}
+
+func NewRateLimiter(ctx context.Context, capacity int32) *RateLimiter {
+	ctx, cancel := context.WithCancel(ctx)
+
+	return &RateLimiter{
+		capacity: capacity,
+		counter:  &atomic.Int32{},
+		ctx:      ctx,
+		cancel:   cancel,
+	}
+}
+
+func (r *RateLimiter) Allow() bool {
+	return r.counter.Add(1) <= r.capacity
+}
+
+func (r *RateLimiter) Close() {
+	r.cancel()
+}
+
+func (r *RateLimiter) bucketRefiller() {
+	t := time.NewTicker(1 * time.Millisecond)
+	defer t.Stop()
+
+	for {
+		select {
+		case <-r.ctx.Done():
+			return
+		case <-t.C:
+			r.counter.Store(0)
+		}
+	}
+}
+
+func TestSyncOnce(t *testing.T) {
+	rl := NewRateLimiter(context.Background(), 3)
+	defer rl.Close()
+
+	for i := 0; i < 3; i++ {
+		if !rl.Allow() {
+			t.Error("Expected to allow access")
+		}
+	}
+
+	if rl.Allow() {
+		t.Error("Expected to deny access")
+	}
+
+	time.Sleep(1 * time.Millisecond)
+
+	if !rl.Allow() {
+		t.Error("Expected to allow access")
+	}
+}
+
 // Unbounded concurrency can lead to resource exhaustion and poor performance due to contention.
 // To limit the number of goroutines that can run concurrently, we can use a semaphore.
 // A semaphore is a synchronization primitive that limits the number of concurrent operations.
