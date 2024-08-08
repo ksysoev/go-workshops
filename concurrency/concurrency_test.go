@@ -138,24 +138,17 @@ func TestDeadlock(t *testing.T) {
 	}
 }
 
-// nil channels are never selected.
-// The select statement blocks until at least one of the send or receive operations can proceed.
+// Synchonization primitives, what do we have in Go?
+// - Channels
+// - Locks
+// - Atomics
+// What is the difference and when to use each of them?
+// - if it's critical section, use Mutex or Atomics
+// - if you're transferring ownership of data, use Channels
+// - if you're trying to protect an internal state of a struct, use Mutex
+// - if you're trying to coordinate multiple pieces of code, use Channels
 
-func Mirror(t *testing.T, in <-chan string, out1 chan<- string, out2 chan<- string) {
-	for msg := range in {
-		var out1, out2 = out1, out2
-		select {
-		case out1 <- msg:
-			out1 = nil
-		case out2 <- msg:
-			out2 = nil
-		}
-	}
-}
-
-func TestNilChannel(t *testing.T) {
-
-}
+// TODO: Would be nice to have a test for each of the synchronization primitives
 
 // Unbounded concurrency can lead to resource exhaustion and poor performance due to contention.
 // To limit the number of goroutines that can run concurrently, we can use a semaphore.
