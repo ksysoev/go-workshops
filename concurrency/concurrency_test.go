@@ -139,17 +139,54 @@ func TestDeadlock(t *testing.T) {
 	}
 }
 
-// Synchonization primitives, what do we have in Go?
-// - Channels
-// - Locks
-// - Atomics
-// What is the difference and when to use each of them?
-// - if it's critical section, use Mutex or Atomics
-// - if you're transferring ownership of data, use Channels
-// - if you're trying to protect an internal state of a struct, use Mutex
-// - if you're trying to coordinate multiple pieces of code, use Channels
+// Channels patterns
+// Channels of channels is a common pattern in Go to implement a producer-consumer model.
+// In this pattern, we have a channel that is used to send requests to a producer goroutine.
+// The producer goroutine processes the requests and sends the results back to the caller using a response channel.
+type NumberIterator struct {
+	requests chan chan<- int
+	ctx      context.Context
+}
 
-// TODO: Would be nice to have a test for each of the synchronization primitives
+func NewNumberIterator(ctx context.Context) *NumberIterator {
+	return &NumberIterator{
+		requests: make(chan chan<- int),
+		ctx:      ctx,
+	}
+}
+
+func (ni *NumberIterator) Next() int {
+	return 0
+}
+
+func (ni *NumberIterator) Run() {
+	counter := 0
+
+	for {
+		select {
+		case respChan := <-ni.requests:
+			counter++
+			respChan <- counter
+		case <-ni.ctx.Done():
+			return
+		}
+	}
+}
+
+func TestChanOfChan(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	ni := NewNumberIterator(ctx)
+
+	go ni.Run()
+
+	for i := 0; i < 2; i++ {
+		if ni.Next() != i+1 {
+			t.Errorf("Expected next number to be %d", i+1)
+		}
+	}
+}
 
 // Sync.Pool is a synchronization primitive that is used to cache and reuse objects.
 // It is useful for reducing memory allocations and improving performance.
