@@ -1,6 +1,7 @@
 package concurrency
 
 import (
+	"bytes"
 	"context"
 	"sync"
 	"sync/atomic"
@@ -149,6 +150,31 @@ func TestDeadlock(t *testing.T) {
 // - if you're trying to coordinate multiple pieces of code, use Channels
 
 // TODO: Would be nice to have a test for each of the synchronization primitives
+
+// Sync.Pool is a synchronization primitive that is used to cache and reuse objects.
+// It is useful for reducing memory allocations and improving performance.
+
+func TestSyncPool(t *testing.T) {
+	pool := sync.Pool{
+		New: func() any {
+			return bytes.NewBuffer([]byte{})
+		},
+	}
+
+	buf := pool.Get().(*bytes.Buffer)
+	buf.Write([]byte("hello"))
+
+	if buf.String() != "hello" {
+		t.Error("Expected data to be hello")
+	}
+
+	pool.Put(buf)
+
+	buf = pool.Get().(*bytes.Buffer)
+	if buf.String() != "" {
+		t.Errorf("Expected data to be emptym got %s", buf.String())
+	}
+}
 
 // Sync.Once is a synchronization primitive that guarantees that a function is executed only once.
 // It is useful for initializing resources that are expensive to create or need to be shared across multiple goroutines.
