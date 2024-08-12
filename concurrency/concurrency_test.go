@@ -140,6 +140,42 @@ func TestDeadlock(t *testing.T) {
 }
 
 // Channels patterns
+
+// Fan-in Fan-out
+// Fan-in is a pattern where multiple goroutines write to the same channel.
+// This is useful when you have multiple goroutines producing results that need to be collected by a single goroutine.
+// Fan-out is a pattern where a single goroutine reads from multiple channels.
+// This is useful when you have a single goroutine that distributes work to multiple worker goroutines.
+
+func Producer(n int, fanOut chan<- int) {
+	// Here we should send n numbers to the fanOut channel
+}
+
+func Consumer(in <-chan int, out chan<- int) {
+	// Here we should receive numbers from the in channel and send the result to the out channel
+}
+
+func TestFanInFanOut(t *testing.T) {
+	expectedNums := 10
+	work := make(chan int)
+	results := make(chan int)
+
+	for i := 0; i < 3; i++ {
+		go Consumer(work, results)
+	}
+
+	go Producer(expectedNums, work)
+
+	for i := 0; i < expectedNums; i++ {
+		select {
+		case res := <-results:
+			t.Log(res)
+		case <-time.After(1 * time.Second):
+			t.Fatal("Expected to receive result")
+		}
+	}
+}
+
 // Channels of channels is a common pattern in Go to implement a producer-consumer model.
 // In this pattern, we have a channel that is used to send requests to a producer goroutine.
 // The producer goroutine processes the requests and sends the results back to the caller using a response channel.
