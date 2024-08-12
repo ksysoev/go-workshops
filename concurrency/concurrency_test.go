@@ -3,6 +3,7 @@ package concurrency
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -229,6 +230,62 @@ func TestChanOfChan(t *testing.T) {
 			t.Errorf("Expected next number to be %d", i+1)
 		}
 	}
+}
+
+// Nil channels block select case forever.
+// It could be useful for excluding some cases from the select statement.
+// Let's see how we can use nil channels on practice.
+func MirrorStream(src <-chan int, dst1, dst2 chan<- int) {
+	for num := range src {
+		for i := 0; i < 2; i++ {
+			select {
+			case dst1 <- num:
+			case dst2 <- num:
+			}
+		}
+	}
+}
+
+func VerifyStream(n int, src <-chan int) error {
+	for num := 0; num < n; num++ {
+		select {
+		case n := <-src:
+			if n != num {
+				return fmt.Errorf("Expected to receive number %d, got %d", num, n)
+			}
+		case <-time.After(1 * time.Second):
+			return fmt.Errorf("Expected to receive number %d", num)
+		}
+	}
+
+	return nil
+}
+
+func TestNilChannels(t *testing.T) {
+	src := make(chan int)
+	dst1 := make(chan int)
+	dst2 := make(chan int)
+
+	go MirrorStream(src, dst1, dst2)
+	go func() {
+		for i := 0; i < 3; i++ {
+			src <- i
+		}
+		close(src)
+	}()
+
+	wg := sync.WaitGroup{}
+	for _, dst := range []chan int{dst1, dst2} {
+		wg.Add(1)
+		go func(dst chan int) {
+			defer wg.Done()
+			if err := VerifyStream(3, dst); err != nil {
+				t.Error(err)
+			}
+		}(dst)
+	}
+
+	wg.Wait()
 }
 
 // Defalut case in select statement is used to handle non-blocking channel operations.
