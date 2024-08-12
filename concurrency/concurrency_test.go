@@ -262,6 +262,34 @@ func TestDefaultCase(t *testing.T) {
 	}
 }
 
+// Unbounded concurrency can lead to resource exhaustion and poor performance due to contention.
+// To limit the number of goroutines that can run concurrently, we can use a semaphore.
+// A semaphore is a synchronization primitive that limits the number of concurrent operations.
+// It is used to control access to a shared resource.
+// We can use a buffered channel to implement a semaphore.
+func TestSemaphoreWithChannels(t *testing.T) {
+	c := atomic.Int32{}
+	wg := sync.WaitGroup{}
+
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			val := c.Add(1)
+			defer c.Add(-1)
+
+			time.Sleep(1 * time.Millisecond)
+
+			if val > 3 {
+				t.Error("Expected to have only 3 goroutines running concurrently")
+			}
+		}()
+	}
+
+	wg.Wait()
+}
+
 // Sync.Pool is a synchronization primitive that is used to cache and reuse objects.
 // It is useful for reducing memory allocations and improving performance.
 
@@ -350,32 +378,4 @@ func TestSyncOnce(t *testing.T) {
 	if !rl.Allow() {
 		t.Error("Expected to allow access")
 	}
-}
-
-// Unbounded concurrency can lead to resource exhaustion and poor performance due to contention.
-// To limit the number of goroutines that can run concurrently, we can use a semaphore.
-// A semaphore is a synchronization primitive that limits the number of concurrent operations.
-// It is used to control access to a shared resource.
-// We can use a buffered channel to implement a semaphore.
-func TestSemaphoreWithChannels(t *testing.T) {
-	c := atomic.Int32{}
-	wg := sync.WaitGroup{}
-
-	for i := 0; i < 10; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-
-			val := c.Add(1)
-			defer c.Add(-1)
-
-			time.Sleep(1 * time.Millisecond)
-
-			if val > 3 {
-				t.Error("Expected to have only 3 goroutines running concurrently")
-			}
-		}()
-	}
-
-	wg.Wait()
 }
