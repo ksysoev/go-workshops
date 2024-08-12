@@ -5,6 +5,7 @@ This repository contains materials for workshops about Go (Golang) programming l
 ## Content
 
 - [Error Handling](./errorhandling/README.md)
+- [Concurrency in Go](./concurrency/README.md)
 
 
 # How to use 
