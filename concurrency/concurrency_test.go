@@ -191,8 +191,8 @@ func NewNumberIterator(ctx context.Context) *NumberIterator {
 	}
 }
 
-func (ni *NumberIterator) Next() int {
-	return 0
+func (ni *NumberIterator) Next(ctx context.Context) (int, error) {
+	return 0, nil
 }
 
 func (ni *NumberIterator) Run() {
@@ -201,6 +201,8 @@ func (ni *NumberIterator) Run() {
 	for {
 		select {
 		case respChan := <-ni.requests:
+			// Simulate some work
+			time.Sleep(1 * time.Millisecond)
 			counter++
 			respChan <- counter
 		case <-ni.ctx.Done():
@@ -218,9 +220,45 @@ func TestChanOfChan(t *testing.T) {
 	go ni.Run()
 
 	for i := 0; i < 2; i++ {
-		if ni.Next() != i+1 {
+		num, err := ni.Next(ctx)
+		if err != nil {
+			t.Errorf("Unexpected error: %v", err)
+		}
+
+		if num != i+1 {
 			t.Errorf("Expected next number to be %d", i+1)
 		}
+	}
+}
+
+// Defalut case in select statement is used to handle non-blocking channel operations.
+// If there are no other cases ready to be executed, the default case will be executed.
+func TestDefaultCase(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	ni := NewNumberIterator(ctx)
+	go ni.Run()
+
+	canceledCtx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	num, err := ni.Next(canceledCtx)
+	if err != context.Canceled {
+		t.Fatalf("Expected error to be %v, got %v", context.Canceled, err)
+	}
+
+	if num != 0 {
+		t.Fatalf("Expected number to be 0, got %d", num)
+	}
+
+	num, err = ni.Next(ctx)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if num != 2 {
+		t.Fatalf("Expected number to be 1, got %d", num)
 	}
 }
 
